@@ -1,19 +1,34 @@
-import { Card, CardContent } from "../../components/ui/card";
+import { useState } from "react";
+import DxfParser, { type IDxf } from "dxf-parser";
+import { ThreeSixtyModel } from "./three-canvas";
 
-export const Home = () => {
+export function Home() {
+  const [dxf, setDxf] = useState<IDxf | null>(null);
+
+  const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (!file) return;
+    const text = await file.text();
+    const parser = new DxfParser();
+    try {
+      const parsed = parser.parseSync(text);
+      setDxf(parsed);
+    } catch (err) {
+      console.error("DXF parse failed:", err);
+    }
+  };
+
   return (
-    <div className="h-screen flex flex-col bg-background text-foreground">
-      <div className="flex flex-1 overflow-hidden">
-        <div className="flex-1 flex items-center justify-center bg-muted/20 border-r border-border">
-          <Card className="p-10 text-center opacity-60">
-            <CardContent>
-              <p className="text-sm text-muted-foreground mt-2">
-                Upload DFX File
-              </p>
-            </CardContent>
-          </Card>
-        </div>
+    <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <input
+        type="file"
+        accept=".dxf"
+        onChange={handleUpload}
+        style={{ margin: "8px" }}
+      />
+      <div style={{ flex: 1, border: "1px solid #ccc" }}>
+        <ThreeSixtyModel dxf={dxf} />
       </div>
     </div>
   );
-};
+}
