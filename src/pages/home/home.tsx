@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DxfParser, { type IDxf } from "dxf-parser";
-import { ThreeCanvas } from "./three-canvas";
+import { ThreeCanvas } from "./three-canvas/three-canvas";
 
 export function Home() {
   const [dxf, setDxf] = useState<IDxf | null>(null);
