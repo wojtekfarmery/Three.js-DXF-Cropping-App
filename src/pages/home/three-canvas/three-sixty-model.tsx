@@ -12,8 +12,6 @@ type ThreeSixtyModelProps = {
 export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
   const groupRef = useRef(new THREE.Group());
   const roiMeshRef = useRef<THREE.Mesh>(null);
-  const transformRef = useRef<any>(null);
-  const orbitRef = useRef<any>(null);
   const { camera } = useThree();
 
   useEffect(() => {
@@ -54,12 +52,6 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
       roiMeshRef.current.position.set(0, 0, 0);
       roiMeshRef.current.scale.set(size.x * 0.3, size.y * 0.3, 1);
     }
-
-    if (transformRef.current && roiMeshRef.current) {
-      transformRef.current.attach(roiMeshRef.current);
-    }
-
-    return () => transformRef.current?.detach();
   }, [dxf, camera]);
 
   return (
@@ -68,21 +60,15 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
       <directionalLight position={[2, 2, 2]} intensity={1.2} />
       <axesHelper args={[500]} />
 
-      <OrbitControls ref={orbitRef} enableZoom enablePan makeDefault />
-      <TransformControls
-        ref={transformRef}
-        mode="translate"
-        showZ={false}
-        onMouseDown={() => (orbitRef.current.enabled = false)}
-        onMouseUp={() => (orbitRef.current.enabled = true)}
-      />
+      <OrbitControls enableZoom enablePan makeDefault />
+      <TransformControls mode="translate" showZ={false}>
+        <mesh ref={roiMeshRef}>
+          <planeGeometry args={[1, 1]} />
+          <meshBasicMaterial color="orange" />
+        </mesh>
+      </TransformControls>
 
       <primitive object={groupRef.current} />
-
-      <mesh ref={roiMeshRef}>
-        <planeGeometry args={[1, 1]} />
-        <meshBasicMaterial color="orange" />
-      </mesh>
     </>
   );
 };
