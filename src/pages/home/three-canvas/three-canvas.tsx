@@ -1,23 +1,20 @@
-import { useEffect, type FC } from "react";
+import { useEffect } from "react";
 import * as THREE from "three";
 import { Canvas, useThree } from "@react-three/fiber";
-import { type IDxf } from "dxf-parser";
 import { ThreeSixtyModel } from "./three-sixty-model";
+import { useStore } from "@/store/use-store";
 
-type ThreeCanvasProps = {
-  dxf: IDxf | null;
-};
-
-export const ThreeCanvas: FC<ThreeCanvasProps> = ({ dxf }) => {
+export const ThreeCanvas = () => {
   return (
-    <Canvas>
-      <FitCamera dxf={dxf} />
-      <ThreeSixtyModel dxf={dxf} />
+    <Canvas gl={{ localClippingEnabled: true }}>
+      <FitCamera />
+      <ThreeSixtyModel />
     </Canvas>
   );
 };
 
-const FitCamera = ({ dxf }: { dxf: IDxf | null }) => {
+const FitCamera = () => {
+  const { dxf } = useStore();
   const { camera, scene } = useThree();
 
   useEffect(() => {

@@ -1,9 +1,10 @@
-import { useState } from "react";
-import DxfParser, { type IDxf } from "dxf-parser";
+import DxfParser from "dxf-parser";
 import { ThreeCanvas } from "./three-canvas/three-canvas";
+import { Toolbar } from "./toolbar";
+import { useStore } from "@/store/use-store";
 
 export function Home() {
-  const [dxf, setDxf] = useState<IDxf | null>(null);
+  const { setDxf } = useStore();
 
   const handleUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
     const file = e.target.files?.[0];
@@ -20,6 +21,7 @@ export function Home() {
 
   return (
     <div style={{ height: "100vh", display: "flex", flexDirection: "column" }}>
+      <Toolbar />
       <input
         type="file"
         accept=".dxf"
@@ -27,7 +29,7 @@ export function Home() {
         style={{ margin: "8px" }}
       />
       <div style={{ flex: 1, border: "1px solid #ccc" }}>
-        <ThreeCanvas dxf={dxf} />
+        <ThreeCanvas />
       </div>
     </div>
   );

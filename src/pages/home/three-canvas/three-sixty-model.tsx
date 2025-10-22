@@ -1,28 +1,24 @@
-import { useEffect, useRef, useState, type FC } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as THREE from "three";
 import { OrbitControls, TransformControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
-import { type IDxf, type IPolylineEntity } from "dxf-parser";
+import { type IPolylineEntity } from "dxf-parser";
 import { buildMeshFromPolyface } from "./build-mesh-from-polyface";
+import { useStore } from "@/store/use-store";
 
-type ThreeSixtyModelProps = { dxf: IDxf | null };
 type ControlHandle = "roi" | "minXminY" | "maxXminY" | "minXmaxY" | "maxXmaxY";
 
-export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
+export const ThreeSixtyModel = () => {
+  const { dxf, isCropped, roi, setRoi } = useStore();
+
   const groupRef = useRef(new THREE.Group());
   const roiMeshRef = useRef<THREE.Mesh>(null);
-  const { camera } = useThree();
-  const scene = useThree((state) => state.scene);
-
+  const { camera, scene } = useThree();
   const [activeHandle, setActiveHandle] = useState<ControlHandle>("roi");
-  const [roi, setRoi] = useState({
-    minX: -50,
-    minY: -50,
-    maxX: 50,
-    maxY: 50,
-  });
-  const handleSetHandle = (handle: ControlHandle) => setActiveHandle(handle);
   const [modelSize, setModelSize] = useState<THREE.Vector3 | null>(null);
+  const [modelMeshes, setModelMeshes] = useState<THREE.Mesh[]>([]);
+
+  const handleSetHandle = (handle: ControlHandle) => setActiveHandle(handle);
 
   const width = roi.maxX - roi.minX;
   const height = roi.maxY - roi.minY;
@@ -44,11 +40,11 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
   };
 
   const handleCornerMove = (corner: string, pos: THREE.Vector3) => {
-    setRoi((prev) => ({
-      ...prev,
+    setRoi({
+      ...roi,
       ...(corner.includes("minX") ? { minX: pos.x } : { maxX: pos.x }),
       ...(corner.includes("minY") ? { minY: pos.y } : { maxY: pos.y }),
-    }));
+    });
   };
 
   useEffect(() => {
@@ -58,13 +54,19 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
     group.clear();
 
     const meshGroup = new THREE.Group();
+    const meshes: THREE.Mesh[] = [];
+
     for (const entity of dxf.entities) {
       if (entity.type === "POLYLINE") {
         const mesh = buildMeshFromPolyface(entity as IPolylineEntity);
-        if (mesh) meshGroup.add(mesh);
+        if (mesh) {
+          meshes.push(mesh);
+          meshGroup.add(mesh);
+        }
       }
     }
 
+    setModelMeshes(meshes);
     group.add(meshGroup);
 
     const box = new THREE.Box3().setFromObject(meshGroup);
@@ -72,10 +74,9 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
     const center = new THREE.Vector3();
     box.getSize(size);
     box.getCenter(center);
-
     setModelSize(size);
-    const maxDim = Math.max(size.x, size.y, size.z);
 
+    const maxDim = Math.max(size.x, size.y, size.z);
     camera.near = maxDim / 1000;
     camera.far = maxDim * 10;
     camera.updateProjectionMatrix();
@@ -84,13 +85,19 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
     camera.position.set(center.x, center.y, distance);
     camera.lookAt(center);
 
-    meshGroup.position.sub(center);
+    const margin = 0.3;
+    setRoi({
+      minX: box.min.x + size.x * margin,
+      minY: box.min.y + size.y * margin,
+      maxX: box.max.x - size.x * margin,
+      maxY: box.max.y - size.y * margin,
+    });
 
     if (roiMeshRef.current) {
-      roiMeshRef.current.position.set(0, 0, 0);
+      roiMeshRef.current.position.set(center.x, center.y, 0);
       roiMeshRef.current.scale.set(size.x * 0.3, size.y * 0.3, 1);
     }
-  }, [dxf, camera]);
+  }, [dxf, camera, setRoi]);
 
   const shouldShowROI =
     dxf &&
@@ -99,6 +106,35 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
     height > modelSize.y * 0.01 &&
     width < modelSize.x * 10 &&
     height < modelSize.y * 10;
+
+  useEffect(() => {
+    if (!modelMeshes.length) return;
+
+    if (!isCropped) {
+      modelMeshes.forEach((material) => {
+        if (!Array.isArray(material.material)) {
+          material.material.clippingPlanes = [];
+          material.material.needsUpdate = true;
+        }
+      });
+      return;
+    }
+
+    const planes = [
+      new THREE.Plane(new THREE.Vector3(1, 0, 0), -roi.minX),
+      new THREE.Plane(new THREE.Vector3(-1, 0, 0), roi.maxX),
+      new THREE.Plane(new THREE.Vector3(0, 1, 0), -roi.minY),
+      new THREE.Plane(new THREE.Vector3(0, -1, 0), roi.maxY),
+    ];
+
+    modelMeshes.forEach((material) => {
+      if (!Array.isArray(material.material)) {
+        material.material.clippingPlanes = planes;
+        material.material.clipShadows = true;
+        material.material.needsUpdate = true;
+      }
+    });
+  }, [roi, isCropped, modelMeshes]);
 
   return (
     <>
@@ -120,9 +156,12 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
             showZ={false}
             onObjectChange={(e) => {
               const obj = e.target.object as THREE.Mesh;
-              if (activeHandle === "roi") handleRoiMove(obj.position);
-              else if (activeHandle)
-                handleCornerMove(activeHandle, obj.position);
+
+              if (activeHandle === "roi") {
+                handleRoiMove(obj.position);
+                return;
+              }
+              handleCornerMove(activeHandle, obj.position);
             }}
           />
 
