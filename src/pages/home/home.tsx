@@ -1,6 +1,6 @@
 import { useState } from "react";
 import DxfParser, { type IDxf } from "dxf-parser";
-import { ThreeSixtyModel } from "./three-canvas";
+import { ThreeCanvas } from "./three-canvas";
 
 export function Home() {
   const [dxf, setDxf] = useState<IDxf | null>(null);
@@ -27,7 +27,7 @@ export function Home() {
         style={{ margin: "8px" }}
       />
       <div style={{ flex: 1, border: "1px solid #ccc" }}>
-        <ThreeSixtyModel dxf={dxf} />
+        <ThreeCanvas dxf={dxf} />
       </div>
     </div>
   );

@@ -1,6 +1,6 @@
 import { useEffect, useRef, type FC } from "react";
 import * as THREE from "three";
-import { Canvas } from "@react-three/fiber";
+import { Canvas, useThree } from "@react-three/fiber";
 import { OrbitControls } from "@react-three/drei";
 import { type IDxf, type IPolylineEntity } from "dxf-parser";
 
@@ -8,8 +8,7 @@ type ThreeSixtyModelProps = {
   dxf: IDxf | null;
 };
 
-export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
-  const rendererRef = useRef<THREE.WebGLRenderer | null>(null);
+const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
   const groupRef = useRef(new THREE.Group());
 
   useEffect(() => {
@@ -40,18 +39,52 @@ export const ThreeSixtyModel: FC<ThreeSixtyModelProps> = ({ dxf }) => {
   }, [dxf]);
 
   return (
-    <Canvas
-      camera={{ position: [0, 0, 1000], fov: 60 }}
-      onCreated={({ gl }) => {
-        rendererRef.current = gl;
-        gl.setClearColor("#eaeaea");
-      }}
-    >
+    <>
       <ambientLight intensity={1.2} />
       <directionalLight position={[2, 2, 2]} intensity={1.2} />
       <axesHelper args={[500]} />
       <OrbitControls enableZoom enablePan />
       <primitive object={groupRef.current} />
+    </>
+  );
+};
+
+const FitCamera = ({ dxf }: { dxf: IDxf | null }) => {
+  const { camera, scene } = useThree();
+
+  useEffect(() => {
+    if (!dxf) return;
+
+    const box = new THREE.Box3().setFromObject(scene);
+    if (!box.isEmpty()) {
+      const size = new THREE.Vector3();
+      const center = new THREE.Vector3();
+      box.getSize(size);
+      box.getCenter(center);
+
+      const maxDim = Math.max(size.x, size.y, size.z);
+      const fov = THREE.MathUtils.degToRad(
+        (camera as THREE.PerspectiveCamera).fov
+      );
+      let cameraZ = Math.abs(maxDim / (2 * Math.tan(fov / 2)));
+      cameraZ *= 2.5; // padding
+
+      camera.position.set(center.x, center.y, center.z + cameraZ);
+      camera.lookAt(center);
+      (camera as THREE.PerspectiveCamera).near = cameraZ / 100;
+      (camera as THREE.PerspectiveCamera).far = cameraZ * 100;
+      (camera as THREE.PerspectiveCamera).updateProjectionMatrix();
+    }
+  }, [dxf, camera, scene]);
+
+  return null;
+};
+
+export const ThreeCanvas = ({ dxf }: { dxf: IDxf | null }) => {
+  return (
+    <Canvas>
+      <FitCamera dxf={dxf} />
+      <ThreeSixtyModel dxf={dxf} />
     </Canvas>
   );
 };
