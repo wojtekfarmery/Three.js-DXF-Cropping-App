@@ -83,7 +83,7 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
         })}
         showZ={false}
         onObjectChange={(e) => {
-          const obj = e.target.object as THREE.Mesh;
+          const obj = (e?.target as any).object as THREE.Mesh;
 
           if (activeHandle === "roi") {
             handleRoiMove(obj.position);
