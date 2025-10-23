@@ -1,4 +1,3 @@
-import { useStore } from "@/store/use-store";
 import { TransformControls } from "@react-three/drei";
 import { useThree } from "@react-three/fiber";
 import { useState, type FC } from "react";
@@ -8,10 +7,29 @@ type ControlHandle = "roi" | "minXminY" | "maxXminY" | "minXmaxY" | "maxXmaxY";
 
 type RoiOverlayProps = {
   modelSize: THREE.Vector3 | null;
+  visible: boolean;
+  roi: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  };
+  setRoi: (roi: {
+    minX: number;
+    minY: number;
+    maxX: number;
+    maxY: number;
+  }) => void;
+  meshRef: React.RefObject<THREE.Mesh | null>;
 };
 
-export const RoiOverlay: FC<RoiOverlayProps> = ({ modelSize }) => {
-  const { dxf, roi, setRoi } = useStore();
+export const RoiOverlay: FC<RoiOverlayProps> = ({
+  modelSize,
+  visible,
+  roi,
+  setRoi,
+  meshRef,
+}) => {
   const { scene } = useThree();
 
   const [activeHandle, setActiveHandle] = useState<ControlHandle>("roi");
@@ -25,14 +43,6 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({ modelSize }) => {
     (roi.maxY + roi.minY) / 2,
     0,
   ];
-
-  const shouldShowROI =
-    dxf &&
-    modelSize &&
-    width > modelSize.x * 0.01 &&
-    height > modelSize.y * 0.01 &&
-    width < modelSize.x * 10 &&
-    height < modelSize.y * 10;
 
   const handleRoiMove = (pos: THREE.Vector3) => {
     const dx = (roi.maxX - roi.minX) / 2;
@@ -52,6 +62,14 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({ modelSize }) => {
       ...(corner.includes("minY") ? { minY: pos.y } : { maxY: pos.y }),
     });
   };
+
+  const shouldShowROI =
+    visible &&
+    modelSize &&
+    width > modelSize.x * 0.01 &&
+    height > modelSize.y * 0.01 &&
+    width < modelSize.x * 10 &&
+    height < modelSize.y * 10;
 
   if (!shouldShowROI) {
     return null;
@@ -75,7 +93,12 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({ modelSize }) => {
         }}
       />
 
-      <mesh position={center} name="roi" onClick={() => handleSetHandle("roi")}>
+      <mesh
+        ref={meshRef}
+        position={center}
+        name="roi"
+        onClick={() => handleSetHandle("roi")}
+      >
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="orange" transparent opacity={0.3} />
       </mesh>
@@ -92,7 +115,9 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({ modelSize }) => {
               onClick={() => handleSetHandle(corner)}
             >
               <sphereGeometry args={[2, 16, 16]} />
-              <meshBasicMaterial color="yellow" />
+              <meshBasicMaterial
+                color={corner === activeHandle ? "red" : "yellow"}
+              />
             </mesh>
           );
         }
