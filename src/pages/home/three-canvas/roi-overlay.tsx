@@ -82,14 +82,20 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
           object: scene.getObjectByName(activeHandle),
         })}
         showZ={false}
-        onObjectChange={(e) => {
-          const obj = (e?.target as any).object as THREE.Mesh;
+        onObjectChange={(event) => {
+          const controls = event?.target as THREE.Event & {
+            object: THREE.Object3D;
+          };
 
-          if (activeHandle === "roi") {
-            handleRoiMove(obj.position);
-            return;
+          const obj = controls.object;
+
+          if (obj instanceof THREE.Mesh) {
+            if (activeHandle === "roi") {
+              handleRoiMove(obj.position);
+              return;
+            }
+            handleCornerMove(activeHandle, obj.position);
           }
-          handleCornerMove(activeHandle, obj.position);
         }}
       />
 
