@@ -12,7 +12,11 @@ type ModelCropProps = {
   };
 };
 
-const useModelCrop = ({ modelMeshes, isCropped, roi }: ModelCropProps) => {
+export const useModelCrop = ({
+  modelMeshes,
+  isCropped,
+  roi,
+}: ModelCropProps) => {
   useEffect(() => {
     if (!modelMeshes.length) return;
 
@@ -42,5 +46,3 @@ const useModelCrop = ({ modelMeshes, isCropped, roi }: ModelCropProps) => {
     });
   }, [roi, isCropped, modelMeshes]);
 };
-
-export default useModelCrop;

@@ -1,21 +1,26 @@
-import { Button } from "@/components/ui/button";
+import { Switch } from "@/components/ui/switch";
 import { useStore } from "@/store/use-store";
-import { Scissors } from "lucide-react";
+import { DxfUpload } from "./dxf-upload";
 
-export const Toolbar = () => {
-  const { isCropped, toggleCropped, dxf } = useStore();
+export function Toolbar() {
+  const { isCropped, toggleCropped } = useStore();
 
   return (
-    <div className="w-full bg-muted/50 border-b border-border px-4 py-2 flex items-center gap-2">
-      <Button
-        variant={isCropped ? "secondary" : "default"}
-        size="sm"
-        disabled={!dxf}
-        onClick={toggleCropped}
-      >
-        <Scissors className="w-4 h-4 mr-2" />
-        {isCropped ? "Show Full" : "Crop View"}
-      </Button>
+    <div className="w-full border-b bg-background/80 backdrop-blur supports-backdrop-filter:bg-background/60">
+      <div className="mx-auto max-w-6xl flex items-center gap-3 p-2">
+        <DxfUpload />
+
+        <div className="flex items-center gap-2 px-2">
+          <Switch
+            checked={isCropped}
+            onCheckedChange={toggleCropped}
+            id="crop"
+          />
+          <label htmlFor="crop" className="text-sm">
+            Cropped view
+          </label>
+        </div>
+      </div>
     </div>
   );
-};
+}

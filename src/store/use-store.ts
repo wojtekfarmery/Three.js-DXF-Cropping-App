@@ -1,5 +1,6 @@
 import { create } from "zustand";
 import { type IDxf } from "dxf-parser";
+import DxfParser from "dxf-parser";
 
 type Roi = {
   minX: number;
@@ -18,6 +19,9 @@ type Store = {
   isCropped: boolean;
   toggleCropped: () => void;
   setCropped: (value: boolean) => void;
+  error: null | string;
+
+  uploadDXF: (file: File) => Promise<void>;
 };
 
 export const useStore = create<Store>((set) => ({
@@ -30,4 +34,16 @@ export const useStore = create<Store>((set) => ({
   isCropped: false,
   toggleCropped: () => set((state) => ({ isCropped: !state.isCropped })),
   setCropped: (value) => set({ isCropped: value }),
+
+  error: null,
+  uploadDXF: async (file) => {
+    try {
+      const text = await file.text();
+      const parser = new DxfParser();
+      const dxf = parser.parseSync(text);
+      set({ dxf });
+    } catch {
+      set({ error: "Failed to upload DXF file" });
+    }
+  },
 }));

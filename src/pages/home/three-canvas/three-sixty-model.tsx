@@ -3,8 +3,8 @@ import { useThree } from "@react-three/fiber";
 
 import { useStore } from "@/store/use-store";
 import { RoiOverlay } from "./roi-overlay";
-import useModelCrop from "./use-model-crop";
 import { useModelLoader } from "./use-model-loader";
+import { useModelCrop } from "./use-model-crop";
 
 export const ThreeSixtyModel = () => {
   const { dxf, isCropped, roi, setRoi } = useStore();
