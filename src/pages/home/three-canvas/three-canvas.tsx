@@ -14,13 +14,14 @@ export const ThreeCanvas = () => {
 };
 
 const FitCamera = () => {
-  const { dxf } = useStore();
+  const { dxf, meta } = useStore();
   const { camera, scene } = useThree();
 
   useEffect(() => {
-    if (!dxf) return;
+    if (!dxf || !meta) return;
 
-    const box = new THREE.Box3().setFromObject(scene);
+    const { bounds } = meta;
+
     if (!box.isEmpty()) {
       const size = new THREE.Vector3();
       const center = new THREE.Vector3();

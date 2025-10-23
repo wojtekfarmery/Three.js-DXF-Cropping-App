@@ -18,7 +18,6 @@ type UseModelLoaderProps = {
 
 export const useModelLoader = ({
   dxf,
-
   setRoi,
   camera,
 }: UseModelLoaderProps) => {
