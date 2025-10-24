@@ -3,6 +3,10 @@
 A lightweight DXF viewer and cropping tool built with TypeScript, Three.js, and Vite.
 It lets users import DXF drawings, visualize them in 3D, define a region of interest (ROI), toggle between cropped and uncropped views, and (optionally) export cropped geometry.
 
+<p align="center">
+  <img src="./public/demo.gif" width="800" alt="DXF Cropping Demo">
+</p>
+
 ## 🚀 Getting Started
 
 Requirements
