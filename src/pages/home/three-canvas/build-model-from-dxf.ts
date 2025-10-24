@@ -27,36 +27,42 @@ export const buildModelFromDxf = (dxf: IDxf | null) => {
     }
   }
 
-  // compute bounds in world space
-  const bounds = new THREE.Box3().setFromObject(meshGroup);
+  const { bounds, size, center } = normalizeModel(meshGroup);
+
+  const margin = 0.3;
+  const roi = {
+    minX: bounds.min.x + size.x * margin,
+    minY: bounds.min.y + size.y * margin,
+    maxX: bounds.max.x - size.x * margin,
+    maxY: bounds.max.y - size.y * margin,
+  };
+
+  return {
+    meshGroup,
+    bounds,
+    size,
+    center,
+    meshes,
+    roi,
+  };
+};
+
+export const normalizeModel = (group: THREE.Group) => {
+  const bounds = new THREE.Box3().setFromObject(group);
   const size = new THREE.Vector3();
   const center = new THREE.Vector3();
   bounds.getSize(size);
   bounds.getCenter(center);
 
-  // center the model at origin
-  meshGroup.position.sub(center);
+  group.position.sub(center);
 
-  // recompute bounds after centering
-  const normalizedBounds = new THREE.Box3().setFromObject(meshGroup);
+  const normalizedBounds = new THREE.Box3().setFromObject(group);
   const normalizedSize = new THREE.Vector3();
   normalizedBounds.getSize(normalizedSize);
 
-  // ROI 30% margin
-  const margin = 0.3;
-  const roi = {
-    minX: normalizedBounds.min.x + normalizedSize.x * margin,
-    minY: normalizedBounds.min.y + normalizedSize.y * margin,
-    maxX: normalizedBounds.max.x - normalizedSize.x * margin,
-    maxY: normalizedBounds.max.y - normalizedSize.y * margin,
-  };
-
   return {
-    meshGroup,
     bounds: normalizedBounds,
     size: normalizedSize,
     center: new THREE.Vector3(0, 0, 0),
-    meshes,
-    roi,
   };
 };

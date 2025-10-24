@@ -1,26 +1,11 @@
 import { create } from "zustand";
 import { type IDxf } from "dxf-parser";
 import DxfParser from "dxf-parser";
-import * as THREE from "three";
 import { buildModelFromDxf } from "@/pages/home/three-canvas/build-model-from-dxf";
-
-type Roi = {
-  minX: number;
-  minY: number;
-  maxX: number;
-  maxY: number;
-};
-
-type ModelData = {
-  bounds: THREE.Box3 | null;
-  size: THREE.Vector3 | null;
-  center: THREE.Vector3 | null;
-  meshes: THREE.Mesh[];
-  meshGroup: THREE.Group | null;
-};
+import type { DxfModel, ModelData, Roi } from "@/types/model";
 
 type Store = {
-  dxf: IDxf | null;
+  dxf: DxfModel;
   setDxf: (dxf: IDxf | null) => void;
 
   roi: Roi | null;
