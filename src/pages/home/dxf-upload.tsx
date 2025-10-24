@@ -7,7 +7,6 @@ export const DxfUpload = () => {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFileChange = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    console.log("File input changed");
     const file = e.target.files?.[0];
     if (file) {
       await uploadDXF(file);

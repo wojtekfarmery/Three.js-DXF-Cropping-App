@@ -20,7 +20,7 @@ export const buildModelFromDxf = (dxf: IDxf) => {
     }
   }
 
-  const { bounds, modelSize, center } = normalizeModel(meshGroup);
+  const { bounds, modelSize, center } = getModelInfo(meshGroup);
 
   const margin = 0.3;
   const roi = {
@@ -40,22 +40,12 @@ export const buildModelFromDxf = (dxf: IDxf) => {
   };
 };
 
-export const normalizeModel = (group: THREE.Group) => {
+export const getModelInfo = (group: THREE.Group) => {
   const bounds = new THREE.Box3().setFromObject(group);
-  const size = new THREE.Vector3();
+  const modelSize = new THREE.Vector3();
   const center = new THREE.Vector3();
-  bounds.getSize(size);
+  bounds.getSize(modelSize);
   bounds.getCenter(center);
 
-  group.position.sub(center);
-
-  const normalizedBounds = new THREE.Box3().setFromObject(group);
-  const normalizedSize = new THREE.Vector3();
-  normalizedBounds.getSize(normalizedSize);
-
-  return {
-    bounds: normalizedBounds,
-    modelSize: normalizedSize,
-    center: new THREE.Vector3(0, 0, 0),
-  };
+  return { bounds, modelSize, center };
 };
