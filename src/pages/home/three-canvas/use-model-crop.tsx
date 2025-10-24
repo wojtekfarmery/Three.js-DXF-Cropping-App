@@ -14,7 +14,9 @@ type ModelCropProps = {
 
 export const useModelCrop = ({ meshes, isCropped, roi }: ModelCropProps) => {
   useEffect(() => {
-    if (!meshes.length || !roi) return;
+    if (!meshes.length || !roi) {
+      return;
+    }
 
     if (!isCropped) {
       meshes.forEach((mesh) => {

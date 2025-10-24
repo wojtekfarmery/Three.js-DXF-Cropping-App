@@ -11,11 +11,9 @@ type FaceVertex = {
   z: number;
 };
 
-export const buildMeshFromPolyface = (
-  entity: IPolylineEntity
-): THREE.Mesh | null => {
+export const buildMeshFromPolyface = (entity: IPolylineEntity): THREE.Mesh => {
   if (entity.vertices.length === 0) {
-    return null;
+    throw new Error("Polyface entity has no vertices.");
   }
 
   const vertexList: { x: number; y: number; z: number }[] = [];
@@ -29,8 +27,12 @@ export const buildMeshFromPolyface = (
     }
   }
 
-  if (vertexList.length === 0 || faceList.length === 0) {
-    return null;
+  if (vertexList.length === 0) {
+    throw new Error("Polyface entity contains no valid vertex data.");
+  }
+
+  if (faceList.length === 0) {
+    throw new Error("Polyface entity contains no valid faces.");
   }
 
   const positions = new Float32Array(vertexList.length * 3);

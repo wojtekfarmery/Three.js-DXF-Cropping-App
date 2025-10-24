@@ -20,7 +20,9 @@ export const useModelLoader = ({ modelData, camera }: UseModelLoaderProps) => {
 
     group.clear();
 
-    if (!meshGroup || !size || !center) return;
+    if (!meshGroup || !size || !center) {
+      return;
+    }
 
     group.add(meshGroup);
 

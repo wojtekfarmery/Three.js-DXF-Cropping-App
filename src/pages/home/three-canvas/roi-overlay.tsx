@@ -52,7 +52,9 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
   };
 
   const handleCornerMove = (corner: string, pos: THREE.Vector3) => {
-    if (!roi) return;
+    if (!roi) {
+      return;
+    }
     setRoi({
       ...roi,
       ...(corner.includes("minX") ? { minX: pos.x } : { maxX: pos.x }),

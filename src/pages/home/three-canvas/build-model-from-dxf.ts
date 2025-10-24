@@ -2,16 +2,9 @@ import * as THREE from "three";
 import type { IDxf, IPolylineEntity } from "dxf-parser";
 import { buildMeshFromPolyface } from "@/pages/home/three-canvas/build-mesh-from-polyface";
 
-export const buildModelFromDxf = (dxf: IDxf | null) => {
+export const buildModelFromDxf = (dxf: IDxf) => {
   if (!dxf) {
-    return {
-      meshGroup: null,
-      bounds: null,
-      size: null,
-      center: null,
-      meshes: [],
-      roi: null,
-    };
+    throw new Error("No DXF data provided.");
   }
 
   const meshGroup = new THREE.Group();

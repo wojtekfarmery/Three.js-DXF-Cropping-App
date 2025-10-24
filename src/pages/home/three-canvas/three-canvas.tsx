@@ -18,7 +18,9 @@ const FitCamera = () => {
   const { camera, scene } = useThree();
 
   useEffect(() => {
-    if (!dxf) return;
+    if (!dxf) {
+      return;
+    }
 
     const box = new THREE.Box3().setFromObject(scene);
     if (!box.isEmpty()) {
