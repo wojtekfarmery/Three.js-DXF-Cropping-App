@@ -69,8 +69,6 @@ export const buildMeshFromPolyface = (entity: IPolylineEntity): THREE.Mesh => {
   return new THREE.Mesh(geometry, material);
 };
 
-const TARGET_SIZE = 800;
-
 const createGeometryFromPositions = (
   positions: Float32Array,
   indices: number[]
@@ -82,10 +80,5 @@ const createGeometryFromPositions = (
   geometry.computeBoundingBox();
   geometry.center();
 
-  const size = new THREE.Vector3();
-  geometry.boundingBox!.getSize(size);
-  const maxDim = Math.max(size.x, size.y, size.z) || 1;
-  const scale = TARGET_SIZE / maxDim;
-  geometry.scale(scale, scale, scale);
   return geometry;
 };

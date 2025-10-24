@@ -28,8 +28,6 @@ export const uploadDXF = async (
     const parser = new DxfParser();
     const dxf = parser.parseSync(text);
 
-    console.log("Parsed DXF:", dxf);
-
     if (!dxf) {
       throw new Error("Error parsing DXF file.");
     }
