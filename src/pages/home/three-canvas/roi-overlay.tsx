@@ -13,14 +13,13 @@ type RoiOverlayProps = {
     minY: number;
     maxX: number;
     maxY: number;
-  };
+  } | null;
   setRoi: (roi: {
     minX: number;
     minY: number;
     maxX: number;
     maxY: number;
   }) => void;
-  meshRef: React.RefObject<THREE.Mesh | null>;
 };
 
 export const RoiOverlay: FC<RoiOverlayProps> = ({
@@ -28,7 +27,6 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
   visible,
   roi,
   setRoi,
-  meshRef,
 }) => {
   const { scene } = useThree();
 
@@ -36,17 +34,17 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
 
   const handleSetHandle = (handle: ControlHandle) => setActiveHandle(handle);
 
-  const width = roi.maxX - roi.minX;
-  const height = roi.maxY - roi.minY;
+  const width = roi ? roi.maxX - roi.minX : 0;
+  const height = roi ? roi.maxY - roi.minY : 0;
   const center: [number, number, number] = [
-    (roi.maxX + roi.minX) / 2,
-    (roi.maxY + roi.minY) / 2,
+    roi ? (roi.maxX + roi.minX) / 2 : 0,
+    roi ? (roi.maxY + roi.minY) / 2 : 0,
     0,
   ];
 
   const handleRoiMove = (pos: THREE.Vector3) => {
-    const dx = (roi.maxX - roi.minX) / 2;
-    const dy = (roi.maxY - roi.minY) / 2;
+    const dx = roi ? (roi.maxX - roi.minX) / 2 : 0;
+    const dy = roi ? (roi.maxY - roi.minY) / 2 : 0;
     setRoi({
       minX: pos.x - dx,
       maxX: pos.x + dx,
@@ -56,6 +54,7 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
   };
 
   const handleCornerMove = (corner: string, pos: THREE.Vector3) => {
+    if (!roi) return;
     setRoi({
       ...roi,
       ...(corner.includes("minX") ? { minX: pos.x } : { maxX: pos.x }),
@@ -74,13 +73,13 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
   if (!shouldShowROI) {
     return null;
   }
+  console.log(scene.getObjectByName(activeHandle));
+
   return (
     <>
       <TransformControls
         mode="translate"
-        {...(activeHandle && {
-          object: scene.getObjectByName(activeHandle),
-        })}
+        object={scene.getObjectByName(activeHandle)}
         showZ={false}
         onObjectChange={(event) => {
           const controls = event?.target as THREE.Event & {
@@ -99,28 +98,23 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
         }}
       />
 
-      <mesh
-        ref={meshRef}
-        position={center}
-        name="roi"
-        onClick={() => handleSetHandle("roi")}
-      >
+      <mesh position={center} name="roi" onClick={() => handleSetHandle("roi")}>
         <planeGeometry args={[width, height]} />
         <meshBasicMaterial color="orange" transparent opacity={0.3} />
       </mesh>
 
       {(["minXminY", "maxXminY", "minXmaxY", "maxXmaxY"] as const).map(
         (corner) => {
-          const x = corner.includes("minX") ? roi.minX : roi.maxX;
-          const y = corner.includes("minY") ? roi.minY : roi.maxY;
+          const x = corner.includes("minX") ? roi?.minX : roi?.maxX;
+          const y = corner.includes("minY") ? roi?.minY : roi?.maxY;
           return (
             <mesh
               name={corner}
               key={corner}
-              position={[x, y, 0]}
+              position={[x ?? 0, y ?? 0, 0]}
               onClick={() => handleSetHandle(corner)}
             >
-              <sphereGeometry args={[2, 16, 16]} />
+              <sphereGeometry args={[width * 0.02, 16, 16]} />
               <meshBasicMaterial
                 color={corner === activeHandle ? "red" : "yellow"}
               />

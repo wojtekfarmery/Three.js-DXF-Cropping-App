@@ -2,26 +2,22 @@ import { useEffect } from "react";
 import * as THREE from "three";
 
 type ModelCropProps = {
-  modelMeshes: THREE.Mesh[];
+  meshes: THREE.Mesh[];
   isCropped: boolean;
   roi: {
     minX: number;
     minY: number;
     maxX: number;
     maxY: number;
-  };
+  } | null;
 };
 
-export const useModelCrop = ({
-  modelMeshes,
-  isCropped,
-  roi,
-}: ModelCropProps) => {
+export const useModelCrop = ({ meshes, isCropped, roi }: ModelCropProps) => {
   useEffect(() => {
-    if (!modelMeshes.length) return;
+    if (!meshes.length || !roi) return;
 
     if (!isCropped) {
-      modelMeshes.forEach((mesh) => {
+      meshes.forEach((mesh) => {
         if (!Array.isArray(mesh.material)) {
           mesh.material.clippingPlanes = null;
           mesh.material.needsUpdate = true;
@@ -37,12 +33,12 @@ export const useModelCrop = ({
       new THREE.Plane(new THREE.Vector3(0, -1, 0), roi.maxY),
     ];
 
-    modelMeshes.forEach((mesh) => {
+    meshes.forEach((mesh) => {
       if (!Array.isArray(mesh.material)) {
         mesh.material.clippingPlanes = planes;
         mesh.material.clipShadows = true;
         mesh.material.needsUpdate = true;
       }
     });
-  }, [roi, isCropped, modelMeshes]);
+  }, [roi, isCropped, meshes]);
 };

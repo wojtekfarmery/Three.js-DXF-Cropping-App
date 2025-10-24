@@ -7,16 +7,18 @@ import { useModelLoader } from "./use-model-loader";
 import { useModelCrop } from "./use-model-crop";
 
 export const ThreeSixtyModel = () => {
-  const { dxf, isCropped, roi, setRoi } = useStore();
+  const { dxf, isCropped, roi, setRoi, modelData } = useStore();
+
+  const { meshes, size: modelSize } = modelData;
 
   const { camera } = useThree();
 
-  const { modelMeshes, modelSize, groupRef, roiMeshRef } = useModelLoader({
-    dxf,
+  const { groupRef } = useModelLoader({
+    modelData,
     camera,
-    setRoi,
   });
-  useModelCrop({ modelMeshes, isCropped, roi });
+
+  useModelCrop({ meshes, isCropped, roi });
 
   const roiOverlayVisible = Boolean(dxf);
 
@@ -34,7 +36,6 @@ export const ThreeSixtyModel = () => {
         visible={roiOverlayVisible}
         roi={roi}
         setRoi={setRoi}
-        meshRef={roiMeshRef}
       />
     </>
   );
