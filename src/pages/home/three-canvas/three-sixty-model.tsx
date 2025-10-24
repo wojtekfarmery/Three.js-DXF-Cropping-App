@@ -9,7 +9,7 @@ import { useModelCrop } from "./use-model-crop";
 export const ThreeSixtyModel = () => {
   const { dxf, isCropped, roi, setRoi, modelData } = useStore();
 
-  const { meshes, size: modelSize } = modelData;
+  const { meshes, modelSize } = modelData;
 
   const { camera } = useThree();
 

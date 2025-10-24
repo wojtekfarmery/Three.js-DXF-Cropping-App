@@ -20,20 +20,20 @@ export const buildModelFromDxf = (dxf: IDxf) => {
     }
   }
 
-  const { bounds, size, center } = normalizeModel(meshGroup);
+  const { bounds, modelSize, center } = normalizeModel(meshGroup);
 
   const margin = 0.3;
   const roi = {
-    minX: bounds.min.x + size.x * margin,
-    minY: bounds.min.y + size.y * margin,
-    maxX: bounds.max.x - size.x * margin,
-    maxY: bounds.max.y - size.y * margin,
+    minX: bounds.min.x + modelSize.x * margin,
+    minY: bounds.min.y + modelSize.y * margin,
+    maxX: bounds.max.x - modelSize.x * margin,
+    maxY: bounds.max.y - modelSize.y * margin,
   };
 
   return {
     meshGroup,
     bounds,
-    size,
+    modelSize,
     center,
     meshes,
     roi,
@@ -55,7 +55,7 @@ export const normalizeModel = (group: THREE.Group) => {
 
   return {
     bounds: normalizedBounds,
-    size: normalizedSize,
+    modelSize: normalizedSize,
     center: new THREE.Vector3(0, 0, 0),
   };
 };

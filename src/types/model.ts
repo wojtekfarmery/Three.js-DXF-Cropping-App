@@ -10,7 +10,7 @@ export type Roi = {
 
 export type ModelData = {
   bounds: THREE.Box3 | null;
-  size: THREE.Vector3 | null;
+  modelSize: THREE.Vector3 | null;
   center: THREE.Vector3 | null;
   meshes: THREE.Mesh[];
   meshGroup: THREE.Group | null;

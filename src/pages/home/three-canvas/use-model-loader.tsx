@@ -5,7 +5,7 @@ import type { Camera } from "@react-three/fiber";
 type UseModelLoaderProps = {
   modelData: {
     meshGroup: THREE.Group | null;
-    size: THREE.Vector3 | null;
+    modelSize: THREE.Vector3 | null;
     center: THREE.Vector3 | null;
   };
   camera: Camera;
@@ -15,18 +15,18 @@ export const useModelLoader = ({ modelData, camera }: UseModelLoaderProps) => {
   const groupRef = useRef<THREE.Group>(new THREE.Group());
 
   useEffect(() => {
-    const { meshGroup, size, center } = modelData;
+    const { meshGroup, modelSize, center } = modelData;
     const group = groupRef.current;
 
     group.clear();
 
-    if (!meshGroup || !size || !center) {
+    if (!meshGroup || !modelSize || !center) {
       return;
     }
 
     group.add(meshGroup);
 
-    const maxDim = Math.max(size.x, size.y, size.z);
+    const maxDim = Math.max(modelSize.x, modelSize.y, modelSize.z);
     const distance = maxDim * 1.5;
 
     camera.near = Math.max(maxDim / 1000, 0.1);

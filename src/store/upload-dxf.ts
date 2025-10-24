@@ -1,11 +1,16 @@
 import DxfParser from "dxf-parser";
 import { toast } from "sonner";
 import { buildModelFromDxf } from "@/pages/home/three-canvas/build-model-from-dxf";
-import type { Store } from "@/types/store";
+import type { DxfModel, Roi, ModelData } from "@/types/model";
 
 export const uploadDXF = async (
   file: File,
-  set: (partial: Partial<Store>) => void
+  set: (partial: {
+    dxf?: DxfModel | null;
+    roi?: Roi | null;
+    modelData?: ModelData;
+    meta?: { entities: number } | null;
+  }) => void
 ) => {
   try {
     if (file.size === 0) {
@@ -19,20 +24,23 @@ export const uploadDXF = async (
     }
 
     const text = await file.text();
+
     const parser = new DxfParser();
     const dxf = parser.parseSync(text);
+
+    console.log("Parsed DXF:", dxf);
 
     if (!dxf) {
       throw new Error("Error parsing DXF file.");
     }
 
-    const { bounds, roi, size, center, meshGroup, meshes } =
+    const { bounds, roi, modelSize, center, meshGroup, meshes } =
       buildModelFromDxf(dxf);
 
     set({
       dxf,
       roi,
-      modelData: { bounds, size, center, meshes, meshGroup },
+      modelData: { bounds, modelSize, center, meshes, meshGroup },
       meta: { entities: dxf.entities.length ?? 0 },
     });
 
@@ -42,7 +50,7 @@ export const uploadDXF = async (
     set({
       modelData: {
         bounds: null,
-        size: null,
+        modelSize: null,
         center: null,
         meshes: [],
         meshGroup: null,
