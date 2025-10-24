@@ -79,7 +79,9 @@ export const RoiOverlay: FC<RoiOverlayProps> = ({
     <>
       <TransformControls
         mode="translate"
-        object={scene.getObjectByName(activeHandle)}
+        {...(activeHandle && {
+          object: scene.getObjectByName(activeHandle),
+        })}
         showZ={false}
         onObjectChange={(event) => {
           const controls = event?.target as THREE.Event & {
